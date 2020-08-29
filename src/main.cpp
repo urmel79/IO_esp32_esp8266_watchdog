@@ -10,10 +10,10 @@
 
 #ifdef ESP32
   #include <esp_task_wdt.h>
-#endif
 
   // 3 seconds WDT
   #define WDT_TIMEOUT 3
+#endif
 
 void setup() {
   Serial.begin(115200);
@@ -34,6 +34,8 @@ void setup() {
   esp_task_wdt_add(NULL);
 #elif ESP8266
   ESP.wdtEnable(0); // how to set the desired timeout??
+  // disable the software watchdog (hardware watchdog will bite after timeout of about 8 s ...)
+  ESP.wdtDisable();
 #endif
 }
 
@@ -43,22 +45,24 @@ int last = millis();
 void loop() {
   // resetting WDT every 2s, 5 times only
   if (millis() - last >= 2000 && i < 5) {
-      Serial.println("Resetting WDT ...");
+    Serial.println("Resetting WDT ...");
 #ifdef ESP32
-      // Reset the TWDT on behalf of the currently running task.
-      esp_task_wdt_reset();
+    // feed the watchdog so that hopefully it doesn't bite you
+    // reset the TWDT on behalf of the currently running task
+    esp_task_wdt_reset(); // feed the watchdog
 #elif ESP8266
-      ESP.wdtFeed();
+    ESP.wdtFeed(); // feed the watchdog
 #endif
-      last = millis();
-      i++;
-      if (i == 5) {
+    last = millis();
+    i++;
+    if (i == 5) {
 #ifdef ESP32
-        Serial.println("Stopping WDT reset. CPU should reboot in 3 s");
+      Serial.println("Stopping WDT reset. CPU should reboot in 3 s");
 #elif ESP8266
-        Serial.println("Stopping WDT reset. CPU should reboot in about 8 s");
-        ESP.wdtDisable();
+      Serial.println("Stopping WDT reset. CPU should reboot in about 8 s");
+      // // disable the software watchdog (hardware watchdog will bite after timeout of about 8 s ...)
+      // ESP.wdtDisable();
 #endif
-      }
+    }
   }
 }
