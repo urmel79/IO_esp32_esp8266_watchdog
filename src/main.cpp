@@ -6,6 +6,7 @@
 
 // ESP8266 part was inspired by:
 // - https://www.sigmdel.ca/michel/program/esp8266/arduino/watchdogs_en.html
+// - https://techtutorialsx.com/2017/01/21/esp8266-watchdog-functions/
 
 #ifdef ESP32
   #include <esp_task_wdt.h>
